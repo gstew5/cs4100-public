@@ -28,11 +28,9 @@ let () =
   try
     let infile =
       try Opt.get infile_opt
-      with Opt.No_value ->
-	   OptParser.usage opt_parser ();
-	   exit (-1)
+      with Opt.No_value -> ""
     in
-    let inbuf  = open_in infile in
+    let inbuf  = if infile = "" then stdin else open_in infile in
     let lexbuf = Lexing.from_channel inbuf in
     lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = infile };
     let p = parse_with_err lexbuf in
