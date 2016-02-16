@@ -26,15 +26,15 @@
   
 exp:
 | LPAREN e = exp RPAREN
-  { e }
+  { print_string "E -> ( E )\n"; e }
 | n = INTCONST
-  { EInt n }
+  { BatPrintf.printf "E -> INTCONST(%d)\n" (Int32.to_int n); EInt n }
 | e1 = exp b = binop e2 = exp
-  { EBinop(b, e1, e2) }
+  { print_string "E -> E binop E\n"; EBinop(b, e1, e2) }
 
 prog:
 | e = exp EOF
-  { e }
+  { print_string "PROG -> E\n"; e }
 
 
 
