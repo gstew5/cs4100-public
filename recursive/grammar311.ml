@@ -1,5 +1,10 @@
 (** An implementation of a recursive descent parser for 
-    [Appel Grammar 3.11] *)
+    [Appel Grammar 3.11] 
+
+    To build, type 
+
+      ocamlbuild grammar311.byte
+*)
 
 type tok = IF | THEN | ELSE | BEGIN | END | PRINT | SEMI | NUM of int | EQ
 
