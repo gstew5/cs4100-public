@@ -3,7 +3,7 @@
 
     To build, type 
 
-      ocamlbuild grammar311.byte
+      ocamlbuild -package batteries grammar311.byte
 *)
 
 type tok = IF | THEN | ELSE | BEGIN | END | PRINT | SEMI | NUM of int | EQ
