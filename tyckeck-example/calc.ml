@@ -3,7 +3,9 @@ open BatFormat
 open BatOptParse
 
 open Lexing
-open Exp       
+open Exp
+open Tycheck       
+open Interp       
 			    
 let print_pos outchan lexbuf =
   let pos = lexbuf.lex_curr_p in
@@ -39,3 +41,5 @@ let () =
   | Sys_error err -> eprintf "System error: %s\n" err
   | Failure err -> eprintf "Error: %s\n" err
   | Division_by_zero -> eprintf "Division by zero!\n"
+  | Dynamic_type_error -> eprintf "Type error detected at runtime!\n"
+  | Static_type_error -> eprintf "Type error detected at compile time!\n"
