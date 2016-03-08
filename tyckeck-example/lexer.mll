@@ -20,13 +20,21 @@ rule token = parse
     [' ' '\t']                  { token lexbuf }
   | newline                     { next_line lexbuf; token lexbuf }
   | ['0'-'9']+ as lxm           { INTCONST(int_of_string lxm) }
-  | ['0'-'9']+'.'['0'-'9']* as lxm{ FLOATCONST(float_of_string lxm) }	
+  | ['0'-'9']+'.'['0'-'9']* as lxm{ FLOATCONST(float_of_string lxm) }
   | '+'        { PLUS }
   | '-'        { MINUS }
   | '*'        { TIMES }
   | '/'        { DIV }
+  | '<'        { LT }	       
+  | "=="       { INTEQ }
+  | '~'        { NOT }
+  | "&&"       { AND }	       
   | '('        { LPAREN }
-  | ')'        { RPAREN }    
+  | ')'        { RPAREN }
+  | "let"      { LET }
+  | "in"       { IN }
+  | '='        { EQ }
+  | ['a'-'z']+ as lxm { ID(lxm) }	       
   | eof        { EOF }
   | _          { raise (Syntax_err ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
 

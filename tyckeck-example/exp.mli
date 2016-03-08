@@ -1,6 +1,6 @@
-exception Division_by_zero
-exception Type_error	    
 
+type id = string
+	    
 type unop = UNot
 
 type binop =
@@ -12,10 +12,12 @@ type value =
   | VInt of int
   | VFloat of float
   | VBool of bool
-	    
+	       
 type exp =
   | EInt of int
   | EFloat of float
   | EBool of bool
   | EUnop of unop * exp
   | EBinop of binop * exp * exp
+  | EVar of id
+  | ELet of id * exp * exp

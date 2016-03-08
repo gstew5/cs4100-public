@@ -4,12 +4,17 @@
 
 %token EOF
 %token <int> INTCONST
-%token <float> FLOATCONST	       
+%token <float> FLOATCONST
+%token <string> ID
 %token NOT
 %token PLUS MINUS TIMES DIV
+%token AND
 %token LT INTEQ
-%token LPAREN RPAREN 
+%token LPAREN RPAREN
+%token LET IN EQ       
 
+%nonassoc IN
+%left AND	  
 %nonassoc LT INTEQ       
 %left PLUS MINUS
 %left TIMES DIV
@@ -32,26 +37,36 @@
   { BTimes }
 | DIV
   { BDiv }
+| AND
+  { BAnd }  
 | LT
   { BLt }
 | INTEQ
   { BIntEq }
+
+id:
+| i = ID
+  { i }
   
 exp:
 | LPAREN e = exp RPAREN
-  { print_string "E -> ( E )\n"; e }
+  { e }
 | n = INTCONST
-  { BatPrintf.printf "E -> INTCONST(%d)\n" n; EInt n }
+  { EInt n }
 | f = FLOATCONST
-  { BatPrintf.printf "E -> FLOATCONST(%f)\n" f; EFloat f }
+  { EFloat f }
 | u = unop e1 = exp %prec unary_over_binary
-  { print_string "E -> unop E\n"; EUnop(u, e1) }
+  { EUnop(u, e1) }
 | e1 = exp b = binop e2 = exp
-  { print_string "E -> E binop E\n"; EBinop(b, e1, e2) }
-
+  { EBinop(b, e1, e2) }
+| x = id
+  { EVar x }	
+| LET x = id EQ e1 = exp IN e2 = exp
+  { ELet(x, e1, e2) }				   
+  
 prog:
 | e = exp EOF
-  { print_string "PROG -> E\n"; e }
+  { e }
 
 
 

@@ -1,5 +1,5 @@
+open Errors
 open Exp
 
-exception Dynamic_type_error
-       
+val tycheck_and_print_result : exp -> unit       
 val print_result : exp -> unit

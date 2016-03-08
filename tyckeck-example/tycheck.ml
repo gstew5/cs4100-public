@@ -1,6 +1,5 @@
+open Errors
 open Exp
-
-exception Static_type_error
        
 type ty =
   | TInt
@@ -18,20 +17,27 @@ let is_arith_ty (t : ty) : bool =
   | (TInt | TFloat) -> true
   | TBool -> false
 
-let rec tycheck (e : exp) : ty =
+let rec tycheck (gamma : ty Symtab.t) (e : exp) : ty =
   match e with
   | EInt _ -> TInt
   | EFloat _ -> TFloat
   | EBool _ -> TBool
   | EUnop(u, e1) ->
-     let t1 = tycheck e1 in
+     let t1 = tycheck gamma e1 in
      (match (u, t1) with
       | (UNot, TBool) -> TBool
       | (UNot, _) -> raise Static_type_error)
   | EBinop(b, e1, e2) ->
-     let t1 = tycheck e1 in
-     let t2 = tycheck e2 in
+     let t1 = tycheck gamma e1 in
+     let t2 = tycheck gamma e2 in
      tycheck_binop b t1 t2
+  | EVar x ->
+     (match Symtab.get x gamma with
+      | None -> raise (Static_scope_error x)
+      | Some t -> t)
+  | ELet(x, e1, e2) ->
+     let t1 = tycheck gamma e1 in
+     tycheck (Symtab.set x t1 gamma) e2
 
 and tycheck_binop (b : binop) (t1 : ty) (t2 : ty) : ty =
   match b with
