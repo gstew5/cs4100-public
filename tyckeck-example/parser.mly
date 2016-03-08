@@ -6,6 +6,8 @@
 %token <int> INTCONST
 %token <float> FLOATCONST
 %token <string> ID
+%token TRUE
+%token FALSE
 %token NOT
 %token PLUS MINUS TIMES DIV
 %token AND
@@ -55,6 +57,10 @@ exp:
   { EInt n }
 | f = FLOATCONST
   { EFloat f }
+| TRUE
+  { EBool true }
+| FALSE
+  { EBool false }
 | u = unop e1 = exp %prec unary_over_binary
   { EUnop(u, e1) }
 | e1 = exp b = binop e2 = exp

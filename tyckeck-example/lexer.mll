@@ -21,6 +21,8 @@ rule token = parse
   | newline                     { next_line lexbuf; token lexbuf }
   | ['0'-'9']+ as lxm           { INTCONST(int_of_string lxm) }
   | ['0'-'9']+'.'['0'-'9']* as lxm{ FLOATCONST(float_of_string lxm) }
+  | "true"     { TRUE }
+  | "false"    { FALSE }  
   | '+'        { PLUS }
   | '-'        { MINUS }
   | '*'        { TIMES }
