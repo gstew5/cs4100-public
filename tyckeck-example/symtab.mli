@@ -7,7 +7,7 @@ type 'a t
 (** Create an empty symbol table. *)
 val create : unit -> 'a t
 
-(** Get the value associated with an [id], if one exists. *)			
+(** Get the value associated with an [id], if one exists. *)	
 val get : string -> 'a t -> 'a option
 
 (** Set the value associated with an [id]. *)
