@@ -45,7 +45,7 @@ let () =
   | Sys_error err -> eprintf "System error: %s\n" err
   | Failure err -> eprintf "Error: %s\n" err
   | Division_by_zero -> eprintf "Division by zero!\n"
-  | Dynamic_type_error -> eprintf "Type error detected at runtime!\n"
-  | Static_type_error -> eprintf "Type error detected at compile time!\n"
-  | Dynamic_scope_error x -> eprintf "Scope error at runtime!\nVariable %s is unbound.\n" x
-  | Static_scope_error x -> eprintf "Scope error at compile time!\nVariable %s is unbound.\n" x
+  | Dynamic_type_error -> eprintf "RUNTIME: Type error detected!\n"
+  | Static_type_error -> eprintf "COMPILE-TIME: Type error detected!\n"
+  | Dynamic_scope_error x -> eprintf "RUNTIME: Scope error!\nVariable %s is unbound.\n" x
+  | Static_scope_error x -> eprintf "COMPILE-TIME: Scope error!\nVariable %s is unbound.\n" x
