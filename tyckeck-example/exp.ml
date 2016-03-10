@@ -6,11 +6,6 @@ type binop =
   | BAnd                           (* boolean operators *)				
   | BLt | BIntEq                   (* comparisons *)
 
-type value =
-  | VInt of int
-  | VFloat of float
-  | VBool of bool
-
 type id = string
 	       
 type exp =

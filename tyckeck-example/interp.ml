@@ -3,6 +3,11 @@ open Batteries
 open Errors
 open Exp
 open Tycheck
+
+type value =
+  | VInt of int
+  | VFloat of float
+  | VBool of bool
        
 let rec eval (rho : value Symtab.t) (e : exp) : value =
   match e with
