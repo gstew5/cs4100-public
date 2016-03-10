@@ -26,7 +26,7 @@ let parse_with_err lexbuf =
 let () =
   let opt_parser = OptParser.make () in
   let infile_opt = StdOpt.str_option ~metavar:"filename" () in
-  let tycheck_opt = StdOpt.str_option ~metavar:"" () in
+  let tycheck_opt = StdOpt.str_option ~metavar:"<some string>" () in
   OptParser.add opt_parser ~short_name:'i' ~long_name:"infile" infile_opt;
   OptParser.add opt_parser ~short_name:'t' ~long_name:"tycheck" tycheck_opt;
   let _ = OptParser.parse_argv opt_parser in
