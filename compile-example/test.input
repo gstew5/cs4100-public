@@ -1,1 +1,5 @@
-let x = (1 + 2) * 3 / 0 in x
+let x = (1 + 2) * 3 / 27 in
+let y = x * x * x in
+let z = 42.0 * 41.0 in
+let w = 5 * x * y * x * y in
+w * w + 27 * 8 - 3

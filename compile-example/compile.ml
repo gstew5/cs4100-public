@@ -10,12 +10,12 @@ let rec instrs_of_exp (p : gensym_pkg) (out : id) (e : exp) : instr list =
   | EBool b -> [IAssign(out, IBool b)]
   | EVar x -> [IAssign(out, IId x)]
   | EUnop (u, e1) ->
-     let e1_out = gensym "_unop" p in
+     let e1_out = gensym "_u" p in
      let is1 = instrs_of_exp p e1_out e in
      is1 @ [IAssign(out, IUnop(u, e1_out))]
   | EBinop (b, e1, e2) ->
-     let e1_out = gensym "_binop1" p in
-     let e2_out = gensym "_binop2" p in
+     let e1_out = gensym "_bl" p in
+     let e2_out = gensym "_br" p in
      let is1 = instrs_of_exp p e1_out e1 in
      let is2 = instrs_of_exp p e2_out e2 in
      is1 @ is2 @ [IAssign(out, IBinop(b, e1_out, e2_out))]
