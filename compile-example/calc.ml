@@ -7,7 +7,8 @@ open Lexing
 open Exp
 open Tycheck       
 open Interp
-open Instr       
+open Instr
+open Compile       
 			    
 let print_pos outchan lexbuf =
   let pos = lexbuf.lex_curr_p in
@@ -44,10 +45,10 @@ let () =
     let p = parse_with_err lexbuf in
 
     if Opt.get tycheck_opt then tycheck_and_print_result p
-    else ();
+    else print_result p;
 
     if Opt.get compile_opt then compile_and_print_result p
-    else print_result p
+    else ()
   with
   | Sys_error err -> eprintf "System error: %s\n" err
   | Failure err -> eprintf "Error: %s\n" err

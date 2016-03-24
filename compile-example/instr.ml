@@ -1,10 +1,11 @@
 open Exp
-open Gensym       
+open Gensym
 
 type iexp =
   | IId of id
   | IInt of int
   | IFloat of float
+  | IBool of bool
   | IUnop of unop * id
   | IBinop of binop * id * id
 
@@ -23,6 +24,8 @@ let rec print_iexp (i : iexp) =
   | IId x -> print_string x
   | IInt n -> print_int n
   | IFloat f -> print_float f
+  | IBool true -> print_string "true"
+  | IBool false -> print_string "false"  
   | IUnop(UNot, x) ->
      print_string "not ";
      print_string x
@@ -45,29 +48,6 @@ let print_instr (i : instr) =
      print_string "ret ";
      print_string x
 
-let rec instrs_of_exp (p : gensym_pkg) (out : id) (e : exp) : instr list =
-  match e with
-  | EInt n -> [IAssign(out, IInt n)]
-  | EFloat f -> [IAssign(out, IFloat f)]
-  | EBool true -> [IAssign(out, IInt 1)]
-  | EBool false -> [IAssign(out, IInt 0)]
-  | EVar x -> [IAssign(out, IId x)]
-  | EUnop (u, e1) ->
-     let e1_out = gensym "_unop" p in
-     let is1 = instrs_of_exp p e1_out e in
-     is1 @ [IAssign(out, IUnop(u, e1_out))]
-  | EBinop (b, e1, e2) ->
-     let e1_out = gensym "_binop1" p in
-     let e2_out = gensym "_binop2" p in
-     let is1 = instrs_of_exp p e1_out e1 in
-     let is2 = instrs_of_exp p e2_out e2 in
-     is1 @ is2 @ [IAssign(out, IBinop(b, e1_out, e2_out))]
-  | ELet (x, e1, e2) ->
-     let e1_out = gensym ("_" ^ x) p in
-     let is1 = instrs_of_exp p e1_out e1 in
-     let is2 = instrs_of_exp p out (subst_var e1_out x e2) in
-     is1 @ is2
-
 let rec print_instr_list (is : instr list) : unit =
   match is with
   | [] -> ()
@@ -76,12 +56,3 @@ let rec print_instr_list (is : instr list) : unit =
      print_string "\n";
      print_instr_list is'
 	     
-let compile_exp (e : exp) : instr list =
-  let p = create_gensym_pkg () in
-  let out = gensym "_out" p in
-  let is = instrs_of_exp p out e in
-  is @ [IRet out]
-	     
-let compile_and_print_result (e : exp) : unit =
-  let is = compile_exp e in
-  print_instr_list is
