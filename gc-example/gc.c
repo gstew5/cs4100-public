@@ -12,15 +12,20 @@ static CHUNK** stack_ptr = STACK+STACK_SIZE-1;
 static CHUNK FROM_HEAP[HEAP_SIZE];
 static CHUNK TO_HEAP[HEAP_SIZE];
 static CHUNK* heap = FROM_HEAP;
-static CHUNK* heap_ptr = FROM_HEAP;
+static CHUNK* heap_ptr = FROM_HEAP; //next free chunk
+
+static uintptr_t stack_size(void)
+{
+  return (uintptr_t)(STACK+STACK_SIZE-1 - stack_ptr);
+}
 
 static void print_chunk(CHUNK* p)
 {
   if (p->tag == INT) {
-    printf("%lu: CHUNK: tag=%d, data=%u\n",
+    printf("%lx: CHUNK: tag=%d, data=%u\n",
 	   (uintptr_t)p, p->tag, p->data.as_int);
   } else if (p->tag == PTR) {
-    printf("%lu: CHUNK: tag=%d, data=%lu\n",
+    printf("%lx: CHUNK: tag=%d, data=%lx\n",
 	   (uintptr_t)p, p->tag, (uintptr_t)p->data.as_ptr);
   } else {
     printf("bad chunk tag\n");
@@ -33,17 +38,18 @@ static void debug(void)
 {
   CHUNK* cur = heap;
 
-  printf("heap = %lu\n", (uintptr_t)heap);
+  printf("heap = %lx\n", (uintptr_t)heap);
   while (cur < heap_ptr) {
     print_chunk(cur);
     cur++;
   }
   printf("heap+heap_ptr\n");
+  printf("stack = %lu chunk(s)\n", stack_size());
 }
 
 void push(CHUNK* root)
 {
-  if (stack_ptr <= STACK) {
+  if (stack_size() >= STACK_SIZE) {
     printf("stack overflow\n");
     exit(-1);
   }
@@ -54,7 +60,7 @@ void push(CHUNK* root)
 
 void pop(void)
 {
-  if (stack_ptr >= STACK+STACK_SIZE) {
+  if (stack_size() <= 0) {
     printf("stack underflow\n");
     exit (-2);
   }
@@ -90,15 +96,21 @@ void copy(CHUNK* from, CHUNK* to)
 void gc(void)
 {
   CHUNK* scan = (heap==FROM_HEAP) ? TO_HEAP : FROM_HEAP;
-  CHUNK* next = scan;
+  CHUNK* next = scan; //next free chunk
   CHUNK** cur = STACK+STACK_SIZE-1;
 
+  int ncopied_roots = 0;
+  int ncopied_blocks = 0;
+ 
   printf("Starting GC\n");
   
   //Copy the roots
   printf("Copying roots\n");
   while (cur > stack_ptr) {
     copy(*cur, next);
+    //Don't forget to update pointer!
+    *cur = next;
+    ncopied_roots++;
     print_chunk(*cur);
     cur--;
     next++;
@@ -108,6 +120,7 @@ void gc(void)
   while (scan < next) {
     if (scan->tag == PTR) {
       copy(scan->data.as_ptr, next);
+      ncopied_blocks++;
       //Don't forget to update pointer!
       scan->data.as_ptr = next;
       print_chunk(scan);      
@@ -115,6 +128,8 @@ void gc(void)
     }
     scan++;
   }
+  printf("Copied roots = %d, copied blocks = %d\n",
+	 ncopied_roots, ncopied_blocks);
 
   heap = (heap==FROM_HEAP) ? TO_HEAP : FROM_HEAP;
   heap_ptr = next;
@@ -125,46 +140,67 @@ int main(void)
 {
   CHUNK* c = new();
 
-  //a pointer chunk
-  c->tag = 1;
+  printf("\na pointer chunk");
+  c->tag = PTR;
   c->data.as_ptr = c;
   debug();
 
-  //stack is empty
+  printf("\nstack is empty\n");
   gc();  
   debug();
 
-  //an integer chunk
+  printf("\nan integer chunk\n");
   c = new();
-  c->tag = 0;
+  c->tag = INT;
   c->data.as_int = 23;
   debug();
   push(c);
-  //stack contains c
+  printf("\nstack contains c\n");
   gc();
   debug();
 
   pop();
-  //stack is empty
+  printf("\nstack is empty\n");
   gc();
   debug();
 
-  //a pointer chunk
+  printf("\na pointer chunk\n");
   c = new();
-  c->tag = 1;
+  c->tag = PTR;
   CHUNK* d = new();
-  d->tag = 0;
+  d->tag = INT;
   d->data.as_int = 42;
   c->data.as_ptr = d;
   debug();
   push(c);
-  //stack contains c
+  printf("\nstack contains c\n");  
   gc();
   debug();
-  //stack contains c
+  printf("\nstack contains c\n");    
   gc();
   debug();
 
+  printf("\nclear stack, allocate 20 blocks, gc\n");    
+  pop(); debug();
+  for (int i = 0; i < 10; i++) {
+    c = new();
+    d = new();
+    c->tag = PTR;
+    c->data.as_ptr = d;
+    push(c);
+  }
+  debug();
+  gc();
+  debug();
+  gc();
+  debug();
+
+  printf("\ntry gc'ing A LOT\n");
+  for (int i = 0; i < 10000; i++) {
+    gc();
+  }
+  debug();
+  
   return 0;
 }
 
