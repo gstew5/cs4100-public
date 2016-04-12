@@ -22,15 +22,16 @@ static uintptr_t stack_size(void)
 static void print_chunk(CHUNK* p)
 {
   if (p->tag == INT) {
-    printf("%lx: CHUNK: tag=%d, data=%u\n",
+    printf("%lx: CHUNK: tag=%d, data=%u, ",
 	   (uintptr_t)p, p->tag, p->data.as_int);
   } else if (p->tag == PTR) {
-    printf("%lx: CHUNK: tag=%d, data=%lx\n",
+    printf("%lx: CHUNK: tag=%d, data=%lx, ",
 	   (uintptr_t)p, p->tag, (uintptr_t)p->data.as_ptr);
   } else {
     printf("bad chunk tag\n");
     exit (-4);
   }
+  printf("forward_ptr: %lx\n", (uintptr_t)p->forward_ptr);
   return;
 }
 
@@ -75,6 +76,7 @@ CHUNK* new(void)
     exit (-3);
   }
   CHUNK* ptr = heap_ptr;
+  ptr->forward_ptr = NULL;
   heap_ptr++;
   return ptr;
 }
@@ -82,6 +84,7 @@ CHUNK* new(void)
 void copy(CHUNK* from, CHUNK* to)
 {
   to->tag = from->tag;
+  to->forward_ptr = NULL;
   if (from->tag == INT) {
     to->data.as_int = from->data.as_int;
   } else if (from->tag == PTR) {
@@ -90,6 +93,8 @@ void copy(CHUNK* from, CHUNK* to)
     printf("bad chunk tag\n");
     exit (-4);
   }
+  //Don't forget to leave a forwarding address!
+  from->forward_ptr = to;
   return;
 }
 
@@ -119,12 +124,18 @@ void gc(void)
   printf("Scanning chunks\n");  
   while (scan < next) {
     if (scan->tag == PTR) {
-      copy(scan->data.as_ptr, next);
-      ncopied_blocks++;
+      if (scan->data.as_ptr->forward_ptr == NULL) {
+	copy(scan->data.as_ptr, next);
+	ncopied_blocks++;
+	//only increment next if we actually copied a block
+	next++;
+      } else { //was already copied
+	next->tag = PTR;
+	next->data.as_ptr = scan->data.as_ptr->forward_ptr;
+      }
       //Don't forget to update pointer!
       scan->data.as_ptr = next;
       print_chunk(scan);      
-      next++;
     }
     scan++;
   }
@@ -140,12 +151,12 @@ int main(void)
 {
   CHUNK* c = new();
 
-  printf("\na pointer chunk");
+  printf("\na pointer chunk\n");
   c->tag = PTR;
   c->data.as_ptr = c;
+  push(c);
   debug();
 
-  printf("\nstack is empty\n");
   gc();  
   debug();
 
@@ -200,7 +211,6 @@ int main(void)
     gc();
   }
   debug();
-  
   return 0;
 }
 
