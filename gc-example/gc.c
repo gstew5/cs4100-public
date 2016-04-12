@@ -127,14 +127,13 @@ void gc(void)
       if (scan->data.as_ptr->forward_ptr == NULL) {
 	copy(scan->data.as_ptr, next);
 	ncopied_blocks++;
+	scan->data.as_ptr = next;	
 	//only increment next if we actually copied a block
 	next++;
       } else { //was already copied
-	next->tag = PTR;
-	next->data.as_ptr = scan->data.as_ptr->forward_ptr;
+	scan->tag = PTR;
+	scan->data.as_ptr = scan->data.as_ptr->forward_ptr;
       }
-      //Don't forget to update pointer!
-      scan->data.as_ptr = next;
       print_chunk(scan);      
     }
     scan++;
