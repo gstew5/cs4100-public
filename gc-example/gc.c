@@ -100,9 +100,11 @@ void copy(CHUNK* from, CHUNK* to)
 
 void gc(void)
 {
+  //scan = address of first block in the new TO space
   CHUNK* scan = (heap==FROM_HEAP) ? TO_HEAP : FROM_HEAP;
-  CHUNK* next = scan; //next free chunk
-  CHUNK** cur = STACK+STACK_SIZE-1;
+  CHUNK* next = scan; //next free chunk in new TO space
+  //cur = address of last chunk in stack  
+  CHUNK** cur = STACK+STACK_SIZE-1; 
 
   int ncopied_roots = 0;
   int ncopied_blocks = 0;
@@ -122,8 +124,10 @@ void gc(void)
   }
 
   printf("Scanning chunks\n");  
-  while (scan < next) {
+  while (scan < next) { //Terminate when scan == next.
     if (scan->tag == PTR) {
+      //Special-case on whether the object pointed to
+      //has been copied yet:
       if (scan->data.as_ptr->forward_ptr == NULL) {
 	copy(scan->data.as_ptr, next);
 	ncopied_blocks++;
@@ -131,7 +135,6 @@ void gc(void)
 	//only increment next if we actually copied a block
 	next++;
       } else { //was already copied
-	scan->tag = PTR;
 	scan->data.as_ptr = scan->data.as_ptr->forward_ptr;
       }
       print_chunk(scan);      

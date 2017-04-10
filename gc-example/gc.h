@@ -8,6 +8,11 @@ enum TAG {
 
 typedef struct chunk {
   enum TAG tag;
+  //The forward pointer is used to determine
+  //whether a particular chunk has already been
+  //copied from FROM to TO; if it has,
+  //forward_ptr will equal the (nonnull) address
+  //of the block's new location in TO space.
   struct chunk* forward_ptr;
   union {
     unsigned int as_int;
